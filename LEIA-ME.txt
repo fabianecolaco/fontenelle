@@ -1,0 +1,31 @@
+COMO PUBLICAR O JOGO NO GITHUB PAGES
+
+1. Crie uma conta em github.com. O nome de usuário vira o começo do link:
+   usuário "mariasilva" -> https://mariasilva.github.io/fontenelle/
+
+2. Clique em "+" (canto superior direito) > "New repository".
+   Nome: fontenelle   ·   marque "Public"   ·   "Create repository".
+
+3. Na página do repositório, clique em "uploading an existing file".
+   Arraste o arquivo index.html e clique em "Commit changes".
+
+4. Os áudios: o GitHub aceita no máximo 100 arquivos por envio.
+   Por isso, eles estão separados em 7 pastas dentro de "audio".
+   Para cada pasta (extra, n1, n2, n3, n4, n5, n6):
+     - clique em "Add file" > "Upload files";
+     - abra a pasta audio no seu computador e arraste a PASTA inteira (ex.: n1) para a janela;
+     - confira se aparece "audio/n1/..." (se aparecer só "n1/...", veja a dica abaixo);
+     - clique em "Commit changes".
+
+   Dica: para os arquivos ficarem dentro de "audio", arraste a pasta "audio" com
+   apenas uma subpasta dentro por vez, OU use o GitHub Desktop e envie tudo de uma vez.
+
+5. Vá em "Settings" > "Pages". Em "Branch", escolha "main" e a pasta "/ (root)" > "Save".
+
+6. Espere 1 a 2 minutos. O link aparece no topo da página de Pages:
+   https://SEU-USUARIO.github.io/fontenelle/
+
+Estrutura final do repositório:
+   index.html
+   audio/extra/   (abertura e encerramento)
+   audio/n1/ ... audio/n6/
