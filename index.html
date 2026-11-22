@@ -158,7 +158,7 @@ td.c{text-align:center;font-weight:800}
 
 <script>
 /* ---------- conteúdo ---------- */
-const MINS={1:7,2:9,3:11,4:11,5:12,6:13};
+const MINS={1:7,2:8,3:10,4:10,5:12,6:13};
 const NIGHTS=[
  {n:1,t:'O Universo não é o que parece'},{n:2,t:'A Lua poderá ser habitada?'},{n:3,t:'O Universo é muito mais diverso do que imaginamos'},
  {n:4,t:'Uma viagem pelos outros mundos'},{n:5,t:'Um Universo sem fim?'},{n:6,t:'O conhecimento nunca está terminado'}
@@ -344,7 +344,7 @@ Object.values(DATA).forEach(N=>{if(N.n===1)return;let k=0;const nx=()=>`n${N.n}-
   N.scenes.forEach(sc=>sc.steps.forEach(st=>{if(['l','n','q','i'].includes(st.t))st.aid=nx();else if(st.t==='ch'){st.qaid=nx();st.eaid=nx()}}))});
 
 let player=null,autoT=null;
-function stopVoice(){clearTimeout(autoT);autoT=null;try{if(player){player.onended=null;player.pause()}}catch(e){}player=null}
+function stopVoice(){clearTimeout(autoT);autoT=null;try{if(player){player.onended=null;player.ontimeupdate=null;player.pause()}}catch(e){}player=null}
 function readSecs(t){return Math.max(2.4,String(t||'').split(/\s+/).length/2.6)}
 const RATES=[1,1.5,2];
 let rateIdx=0;try{rateIdx=Math.max(0,RATES.indexOf(+localStorage.getItem('fontenelle-vel')))}catch(e){}
@@ -357,7 +357,7 @@ function voice(aid,text,then){
   stopVoice();if(S.paused)return;
   const wait=()=>{autoT=setTimeout(then,readSecs(text)*1000/RATE())};
   if(!aid||!AUDIO[aid]){wait();return}
-  try{player=new Audio(AUDIO[aid]);player.playbackRate=RATE();player.onended=()=>{autoT=setTimeout(then,450/RATE())};player.play().catch(()=>{player=null;wait()})}catch(e){wait()}
+  try{player=new Audio(AUDIO[aid]);player.playbackRate=RATE();let done=false;const fin=()=>{if(done)return;done=true;autoT=setTimeout(then,60)};player.ontimeupdate=function(){if(this.duration&&this.currentTime>=this.duration-0.24)fin()};player.onended=fin;player.play().catch(()=>{player=null;wait()})}catch(e){wait()}
 }
 function autoNext(){
   if(S.paused||S.view!=='night')return;
