@@ -73,6 +73,9 @@ button:focus-visible{outline:3px solid var(--gold-2);outline-offset:2px}
 .topbar{position:absolute;inset:0 0 auto 0;display:flex;align-items:center;justify-content:space-between;gap:1em;padding:.5em 1em 1.6em;background:linear-gradient(rgba(5,8,15,.8),rgba(5,8,15,0));font-size:.85em}
 .tt{font-weight:700;color:var(--moon);text-align:center;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .tr{display:flex;gap:1em;align-items:center}
+.ctr{display:flex;gap:.45em;align-items:center}
+.ctr .btn.ghost{padding:.65em .8em}
+.btn.sm{font-size:.72em;padding:.4em .8em}
 .spd{display:inline-flex;gap:.3em;align-items:center}
 .spd button{min-width:2.6em;padding:.2em .45em;border:1.5px solid var(--gold);border-radius:.25em;background:rgba(5,8,15,.55);color:var(--gold-2);font-weight:800;font-size:.85em;line-height:1.3}
 .spd button[aria-pressed="true"]{background:var(--gold);color:#1c1405}
@@ -353,6 +356,8 @@ function rateLabel(){return 'Velocidade '+String(RATE()).replace('.',',')+'x'}
 function cycleRate(){rateIdx=(rateIdx+1)%RATES.length;try{localStorage.setItem('fontenelle-vel',RATE())}catch(e){}[player,typeof intro!=='undefined'?intro:null,typeof closingA!=='undefined'?closingA:null].forEach(a=>{if(a)a.playbackRate=RATE()});document.querySelectorAll('.ratebtn').forEach(b=>b.textContent=rateLabel())}
 function rateBoxes(){return `<span class="spd" role="group" aria-label="Velocidade da narração">${RATES.map((r,i)=>`<button aria-pressed="${i===rateIdx}" onclick="setRate(${i})">${String(r).replace('.',',')}x</button>`).join('')}</span>`}
 function setRate(i){rateIdx=i;try{localStorage.setItem('fontenelle-vel',RATE())}catch(e){}[player,typeof intro!=='undefined'?intro:null,typeof closingA!=='undefined'?closingA:null].forEach(a=>{if(a)a.playbackRate=RATE()});document.querySelectorAll('.spd button').forEach((b,k)=>b.setAttribute('aria-pressed',k%RATES.length===rateIdx))}
+function goBack(){const N=DATA[S.night];if(S.i>0)S.i--;else if(S.sc>0){S.sc--;S.i=N.scenes[S.sc].steps.length-1}else return;stopVoice();go(null,true);playStep(N.scenes[S.sc].steps[S.i])}
+function replayQ(id){const st=DATA[S.night].scenes.flatMap(s=>s.steps).find(x=>x.id===id);if(!st)return;const was=S.paused;S.paused=false;if(S.ans[id]!=null)voice(st.eaid,st.e,was?()=>{}:autoNext);else voice(st.qaid,st.q,()=>{});S.paused=was;if(was)go(null,true)}
 function voice(aid,text,then){
   stopVoice();if(S.paused)return;
   const wait=()=>{autoT=setTimeout(then,readSecs(text)*1000/RATE())};
@@ -518,7 +523,7 @@ function fs(){const a=document.getElementById('app');try{if(document.fullscreenE
 const bgGarden=()=>gardenSvg().replace('<svg ','<svg preserveAspectRatio="xMidYMid slice" ');
 function chalNum(id){return DATA[S.night].scenes.flatMap(s=>s.steps).filter(x=>x.t==='ch').findIndex(x=>x.id===id)+1}
 function chalHtml(st){const a=S.ans[st.id],n=chalNum(st.id);
-  return `<section class="chal" aria-label="Desafio ${n}"><span class="eyebrow">Desafio ${n} de 3</span><h3>${st.q}</h3>
+  return `<section class="chal" aria-label="Desafio ${n}"><div class="row" style="justify-content:space-between"><span class="eyebrow">Desafio ${n} de 3</span><button class="btn ghost sm" onclick="replayQ('${st.id}')">▶ Ouvir de novo</button></div><h3>${st.q}</h3>
   <div class="opts">${st.o.map((o,i)=>`<button class="opt ${a===i?'pick':''}" ${a!=null?'disabled':''} onclick="answer('${st.id}',${i})"><span>${LET[i]})</span>${o}</button>`).join('')}</div>
   ${a!=null?`<p class="verdict">Sua escolha: ${LET[a]} · Resposta de referência: ${LET[st.a]}</p><div class="expl"><b>Explicação do filósofo</b><p>${st.e}</p></div><div><button class="btn" onclick="advance()">Continuar</button></div>`:''}</section>`}
 function bandHtml(sc,st,b,label){
@@ -530,7 +535,8 @@ function bandHtml(sc,st,b,label){
   else if(st.t==='g')c=st.need?`<p class="txt cap">${blocked(st)?st.x:st.done}</p>`:`<p class="txt cap">${(S.f.vin&&S.f.vout)?'Você viu o barco de dentro e das margens.':'Use os botões no alto da cena: olhe o barco de dentro e das margens.'}</p>`;
   else if(st.t==='i')c=`<span class="who Q">${st.lab||'Ideia central'}</span><p class="txt">${st.x}</p>`;
   else if(st.t==='ch')c=`<p class="txt cap">Responda ao desafio.</p>`;
-  return `<div class="band"><div class="bc" aria-live="polite">${c}</div><button class="btn" id="next" ${b?'disabled':''} onclick="advance()">${label}</button></div>`;
+  const first=S.sc===0&&S.i===0;
+  return `<div class="band"><div class="bc" aria-live="polite">${c}</div><div class="ctr"><button class="btn ghost" onclick="goBack()" ${first?'disabled':''} aria-label="Voltar à fala anterior">◀ Voltar</button><button class="btn ghost" onclick="togglePause()">${S.paused?'▶ Retomar':'❚❚ Pausar'}</button><button class="btn" id="next" ${b?'disabled':''} onclick="advance()">${label}</button></div></div>`;
 }
 function ovlFor(sc){
   if(sc.stage==='models')return `<div class="leg l"><b>Modelo A:</b> a Terra no centro (Ptolomeu, séc. II)</div><div class="leg r"><b>Modelo B:</b> o Sol no centro (Copérnico, 1543)</div>`;
@@ -572,7 +578,7 @@ function nightView(){
   <div class="stagebox"><div class="stage" id="stage"></div>
    <div class="topbar"><button class="link" onclick="go('menu')">Noites</button>
     <span class="tt"><span class="dots" aria-hidden="true">${N.scenes.map((_,i)=>`<i class="${i<=S.sc?'on':''}"></i>`).join('')}</span>${ord(N.n)} · Cena ${S.sc+1} de ${N.scenes.length} · ${sc.t}</span>
-    <span class="tr">${rateBoxes()}<button class="link" onclick="togglePause()">${S.paused?'Retomar':'Pausar'}</button><button class="link" onclick="fs()">Tela cheia</button></span></div>
+    <span class="tr">${rateBoxes()}<button class="link" onclick="fs()">Tela cheia</button></span></div>
    ${ovlFor(sc)}</div>
   ${bandHtml(sc,cur,b,label)}
   ${cur.t==='ch'?`<div class="scrim">${chalHtml(cur)}</div>`:''}
